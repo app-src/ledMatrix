@@ -62,6 +62,10 @@
             background-color: #0056b3;
         }
     </style>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
 </head>
 <body>
     <div class="input-container">
@@ -77,6 +81,23 @@
     <button onclick="generateOutput()">Generate Output</button>
 
     <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBfWZuDg0lpDnf5DL_RhFOLvN_gEFv2ypw",
+            authDomain: "allprojects68.firebaseapp.com",
+            databaseURL: "https://allprojects68-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "allprojects68",
+            storageBucket: "allprojects68.appspot.com",
+            messagingSenderId: "410036131920",
+            appId: "1:410036131920:web:6ba583d42688e4fa105955"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        let selectedCircles = []; // Global array to keep track of selected circles
+
         function generateGrid() {
             const width = parseInt(document.getElementById('width').value);
             const height = parseInt(document.getElementById('height').value);
@@ -117,10 +138,11 @@
                     }
                 }
 
-                // Add click event to each circle for toggling selection
+                // Add click event to each circle for toggling selection and updating Firebase
                 rowCircles.forEach(circle => {
                     circle.onclick = function() {
                         circle.classList.toggle('selected');
+                        updateSelectedCircles(circle.dataset.number, circle.classList.contains('selected'));
                     };
                     row.appendChild(circle); // Append each circle to the row
                 });
@@ -129,20 +151,28 @@
             }
         }
 
-        function generateOutput() {
-            const width = parseInt(document.getElementById('width').value);
-            const height = parseInt(document.getElementById('height').value);
-            const circles = document.querySelectorAll('.circle');
-            const output = [];
-
-            circles.forEach((circle) => {
-                if (circle.classList.contains('selected')) {
-                    let displayedNumber = parseInt(circle.dataset.number);
-                    output.push(displayedNumber);
+        function updateSelectedCircles(circleNumber, isSelected) {
+            if (isSelected) {
+                // Add circle number if selected
+                if (!selectedCircles.includes(circleNumber)) {
+                    selectedCircles.push(circleNumber);
                 }
-            });
+            } else {
+                // Remove circle number if deselected
+                selectedCircles = selectedCircles.filter(num => num !== circleNumber);
+            }
 
-            alert('Selected Circles: ' + output.join(', '));
+            // Update the selected list in Firebase as a whole array
+            const selectedRef = db.ref('vaiLED/selected');
+            selectedRef.set(selectedCircles);
+        }
+
+        function generateOutput() {
+            const selectedRef = db.ref('vaiLED/selected');
+            selectedRef.once('value').then((snapshot) => {
+                const selected = snapshot.val() || [];
+                alert('Selected Circles: ' + selected.join(', '));
+            });
         }
     </script>
 </body>
