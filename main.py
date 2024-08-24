@@ -36,7 +36,7 @@ def connect_to_wifi(ssid, password):
 def turn_off_all_leds():
     for i in range(n):
         np[i] = (0, 0, 0)
-    np.write()
+#     np.write()
 
 # Function to fetch the LED data from Firebase
 def fetch_led_data_from_firebase():
@@ -55,7 +55,7 @@ def fetch_led_data_from_firebase():
 
 # Function to update LEDs based on the Firebase data
 def update_leds(led_indices):
-    #turn_off_all_leds()  # Turn off all LEDs first
+    turn_off_all_leds()  # Turn off all LEDs first
     for i in led_indices:
         if i < n:  # Check to prevent out-of-range indices
             np[i] = (255, 255, 0)

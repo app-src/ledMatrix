@@ -149,6 +149,9 @@
 
                 gridContainer.appendChild(row); // Append the row to the grid container
             }
+
+            // Render the selected circles from Firebase
+            renderSelectedCircles();
         }
 
         function updateSelectedCircles(circleNumber, isSelected) {
@@ -167,6 +170,23 @@
             selectedRef.set(selectedCircles);
         }
 
+        function renderSelectedCircles() {
+            const selectedRef = db.ref('vaiLED/selected');
+            selectedRef.once('value').then((snapshot) => {
+                const selected = snapshot.val() || [];
+                selectedCircles = selected; // Update the global selectedCircles array
+
+                // Mark the circles as selected
+                const circles = document.querySelectorAll('.circle');
+                circles.forEach(circle => {
+                    const number = parseInt(circle.dataset.number);
+                    if (selectedCircles.includes(number)) {
+                        circle.classList.add('selected');
+                    }
+                });
+            });
+        }
+
         function generateOutput() {
             const selectedRef = db.ref('vaiLED/selected');
             selectedRef.once('value').then((snapshot) => {
@@ -174,6 +194,11 @@
                 alert('Selected Circles: ' + selected.join(', '));
             });
         }
+
+        // Fetch the grid and render selected circles on page load
+        window.onload = function() {
+            generateGrid();
+        };
     </script>
 </body>
 </html>
