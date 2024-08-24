@@ -1,25 +1,80 @@
-import machine, neopixel
+import machine
+import neopixel
+import urequests
+import time
+import json
+import network
+
+# Wi-Fi configuration
+WIFI_SSID = 'Vaibhav 4g'  # Replace with your Wi-Fi SSID
+WIFI_PASSWORD = 'rajesh@15'  # Replace with your Wi-Fi password
+
+# Firebase configuration
+firebase_url = "https://allprojects68-default-rtdb.asia-southeast1.firebasedatabase.app/vaiLED/selected.json"
 
 n = 210
 p = 27
 
 np = neopixel.NeoPixel(machine.Pin(p), n)
 
-# Turn off all LEDs
-for i in range(n):
-    np[i] = (0, 0, 0)
+# Function to connect to Wi-Fi
+def connect_to_wifi(ssid, password):
+    wlan = network.WLAN(network.STA_IF)
+    wlan.active(True)
+    wlan.connect(ssid, password)
     
+    print(f"Connecting to Wi-Fi network: {ssid}")
     
-O=[]    
-O = [34, 33, 32, 31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0, 35, 69, 104, 70, 105, 139, 174, 140, 175, 176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207, 208, 209]
+    while not wlan.isconnected():
+        print(".", end="")
+        time.sleep(1)
+    
+    print("\nConnected to Wi-Fi!")
+    print("Network Config:", wlan.ifconfig())
 
-#O = [1, 2, 3, 4, 5, 6, 8, 11, 16, 17, 18, 19, 21, 22, 32, 37, 39, 42, 43, 45, 48, 50, 51, 52, 53, 58, 59, 60, 64, 71, 72, 77, 80, 81, 90, 91, 92, 93
-#O = [120,12,14,35,17]
+# Function to turn off all LEDs
+def turn_off_all_leds():
+    for i in range(n):
+        np[i] = (0, 0, 0)
+    np.write()
 
+# Function to fetch the LED data from Firebase
+def fetch_led_data_from_firebase():
+    try:
+        response = urequests.get(firebase_url)
+        if response.status_code == 200:
+            print("Data fetched successfully")
+            data = response.json()  # Parse the JSON response
+            print("Fetched data:", data)  # Debug: Print the fetched data
+            return data if data else []  # Ensure it returns an empty list if data is None
+        else:
+            print("Failed to fetch data. Status code:", response.status_code)
+    except Exception as e:
+        print("Error fetching data:", e)
+    return []
 
+# Function to update LEDs based on the Firebase data
+def update_leds(led_indices):
+    #turn_off_all_leds()  # Turn off all LEDs first
+    for i in led_indices:
+        if i < n:  # Check to prevent out-of-range indices
+            np[i] = (255, 255, 0)
+    np.write()
 
-for i in range(0,n):
-    if i in O:
-        np[i] = (255,255,0)
+# Main program
+def main():
+    connect_to_wifi(WIFI_SSID, WIFI_PASSWORD)  # Connect to Wi-Fi
 
-np.write()
+    while True:
+        O = fetch_led_data_from_firebase()  # Fetch the selected LEDs from Firebase
+        print("Fetched LED indices:", O)
+        
+        if O:
+            update_leds(O)  # Update the LEDs with the fetched data
+
+        time.sleep(10)  # Delay between updates (10 seconds)
+
+# Start the program
+if __name__ == "__main__":
+    main()
+

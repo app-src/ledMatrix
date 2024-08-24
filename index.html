@@ -142,7 +142,7 @@
                 rowCircles.forEach(circle => {
                     circle.onclick = function() {
                         circle.classList.toggle('selected');
-                        updateSelectedCircles(circle.dataset.number, circle.classList.contains('selected'));
+                        updateSelectedCircles(parseInt(circle.dataset.number), circle.classList.contains('selected'));
                     };
                     row.appendChild(circle); // Append each circle to the row
                 });
