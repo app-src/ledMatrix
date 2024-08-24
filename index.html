@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Circle Grid Generator with Vertical Mirroring</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 20px;
+        }
+
+        .input-container {
+            margin-bottom: 20px;
+        }
+
+        label {
+            margin-right: 10px;
+        }
+
+        .circle {
+            width: 30px;
+            height: 30px;
+            background-color: #ddd;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #000;
+        }
+
+        .selected {
+            background-color: #4CAF50;
+            color: #fff;
+        }
+
+        .grid-container {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            width: fit-content;
+        }
+
+        button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="input-container">
+        <label for="width">Width:</label>
+        <input type="number" id="width" min="1" placeholder="Enter width">
+        <label for="height">Height:</label>
+        <input type="number" id="height" min="1" placeholder="Enter height">
+        <button onclick="generateGrid()">Generate Grid</button>
+    </div>
+
+    <div class="grid-container" id="gridContainer"></div>
+
+    <button onclick="generateOutput()">Generate Output</button>
+
+    <script>
+        function generateGrid() {
+            const width = parseInt(document.getElementById('width').value);
+            const height = parseInt(document.getElementById('height').value);
+            const gridContainer = document.getElementById('gridContainer');
+
+            gridContainer.innerHTML = ''; // Clear the container
+
+            let circleNumber = 0; // Start counting circles from 0
+
+            for (let i = 0; i < height; i++) {
+                const row = document.createElement('div');
+                row.style.display = 'flex'; // Set row to flex for proper alignment
+
+                const rowCircles = [];
+
+                for (let j = 0; j < width; j++) {
+                    const circle = document.createElement('div');
+                    circle.classList.add('circle');
+                    rowCircles.push(circle); // Add circle to row array
+                }
+
+                // Numbering logic for circles with vertical mirroring in mind
+                const mirroredRowIndex = height - i - 1;
+
+                if (mirroredRowIndex % 2 === 0) {
+                    // Even rows in mirrored order: left to right
+                    for (let j = 0; j < width; j++) {
+                        rowCircles[j].textContent = circleNumber;
+                        rowCircles[j].dataset.number = circleNumber; // Store the displayed number
+                        circleNumber++;
+                    }
+                } else {
+                    // Odd rows in mirrored order: right to left
+                    for (let j = 0; j < width; j++) {
+                        rowCircles[width - j - 1].textContent = circleNumber;
+                        rowCircles[width - j - 1].dataset.number = circleNumber; // Store the displayed number
+                        circleNumber++;
+                    }
+                }
+
+                // Add click event to each circle for toggling selection
+                rowCircles.forEach(circle => {
+                    circle.onclick = function() {
+                        circle.classList.toggle('selected');
+                    };
+                    row.appendChild(circle); // Append each circle to the row
+                });
+
+                gridContainer.appendChild(row); // Append the row to the grid container
+            }
+        }
+
+        function generateOutput() {
+            const width = parseInt(document.getElementById('width').value);
+            const height = parseInt(document.getElementById('height').value);
+            const circles = document.querySelectorAll('.circle');
+            const output = [];
+
+            circles.forEach((circle) => {
+                if (circle.classList.contains('selected')) {
+                    let displayedNumber = parseInt(circle.dataset.number);
+                    output.push(displayedNumber);
+                }
+            });
+
+            alert('Selected Circles: ' + output.join(', '));
+        }
+    </script>
+</body>
+</html>
