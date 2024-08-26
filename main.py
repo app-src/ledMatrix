@@ -1,4 +1,4 @@
-import machine
+from machine import ADC , Pin
 import neopixel
 import urequests
 import time
@@ -8,6 +8,12 @@ import network
 # Wi-Fi configuration
 WIFI_SSID = 'Vaibhav 4g'  # Replace with your Wi-Fi SSID
 WIFI_PASSWORD = 'rajesh@15'  # Replace with your Wi-Fi password
+
+# Setup ADC for potentiometer
+adc = ADC(Pin(35))  # Use GPIO15 for ADC reading (D15)
+adc.atten(ADC.ATTN_11DB)  # Configure for full range 0-3.3V
+adc.width(ADC.WIDTH_12BIT)  # 12-bit resolution, values 0-4095
+
 
 # Firebase configuration
 firebase_url = "https://allprojects68-default-rtdb.asia-southeast1.firebasedatabase.app/vaiLED/"
@@ -20,9 +26,9 @@ n = 210
 p = 27
 
 x, y, z = 0,0,0
+brightness = 1
 
-
-np = neopixel.NeoPixel(machine.Pin(p), n)
+np = neopixel.NeoPixel(Pin(p), n)
 
 
 
@@ -69,13 +75,16 @@ def fetch_led_data_from_firebase():
     return data["led"], data["color"]
 
 def update_leds(led_indices, led_color):
-    global x, y, z
+    global x, y, z, brightness
     turn_off_all_leds()
+    
+    brightness = adc.read() / 4095
+    print(brightness)
     
     for i in led_indices:
         if i < n:
             #np[i] = (led_color["red"], led_color["green"], led_color["blue"])
-            np[i] = tuple(int(c * 1) for c in (led_color["red"], led_color["green"], led_color["blue"]))
+            np[i] = tuple(int(c * brightness) for c in (led_color["red"], led_color["green"], led_color["blue"]))
             
             
     np.write()
@@ -134,4 +143,7 @@ def main():
 # Start the program
 if __name__ == "__main__":
     main()
+    """while True:
+        print(adc.read() / 4095)
+        time.sleep(1)"""
 

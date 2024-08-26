@@ -254,7 +254,8 @@ document.getElementById('colorPicker').addEventListener('input', function() {
 });
 
 document.getElementById('brightnessSlider').addEventListener('input', function() {
-    updateBrightness();
+    // updateBrightness();
+    updateColorPicker();
 });
 
 function updateBrightness() {
@@ -274,6 +275,7 @@ function updateBrightness() {
 
     // Update the display or send the adjusted RGB values to your LEDs
     console.log('Adjusted RGB:', adjustedRGB);  // Log or use the adjusted RGB values
+    return adjustedRGB;
 }
 
 
@@ -309,9 +311,16 @@ function updateSlidersAndText(rgb) {
 }
 
 function updateColorPicker() {
-    const red = parseInt(document.getElementById('redSlider').value, 10);
-    const green = parseInt(document.getElementById('greenSlider').value, 10);
-    const blue = parseInt(document.getElementById('blueSlider').value, 10);
+    // const red = parseInt(document.getElementById('redSlider').value, 10);
+    // const green = parseInt(document.getElementById('greenSlider').value, 10);
+    // const blue = parseInt(document.getElementById('blueSlider').value, 10);
+    // const brightness = parseInt(document.getElementById('brightnessSlider').value, 10);
+
+    const color = updateBrightness();
+    const red = color.red;
+    const green = color.green;
+    const blue = color.blue;
+
     const hexColor = rgbToHex(red, green, blue);
     document.getElementById('colorPicker').value = hexColor;
     document.getElementById('rgbValue').value = `RGB(${red}, ${green}, ${blue})`;
