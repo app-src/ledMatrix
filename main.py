@@ -10,7 +10,9 @@ WIFI_SSID = 'Vaibhav 4g'  # Replace with your Wi-Fi SSID
 WIFI_PASSWORD = 'rajesh@15'  # Replace with your Wi-Fi password
 
 # Firebase configuration
-firebase_url = "https://allprojects68-default-rtdb.asia-southeast1.firebasedatabase.app/vaiLED/selected.json"
+firebase_url = "https://allprojects68-default-rtdb.asia-southeast1.firebasedatabase.app/vaiLED/"
+led_node = "selected.json"
+color_node = "colors.json"
 
 n = 210
 p = 27
@@ -44,21 +46,37 @@ def turn_off_all_leds():
 
 # Function to fetch the LED data from Firebase
 def fetch_led_data_from_firebase():
+    data = {"led":[], "color":[]}
     try:
-        response = urequests.get(firebase_url)
+        response = urequests.get(firebase_url + led_node)
         if response.status_code == 200:
             print("Data fetched successfully")
-            data = response.json()  # Parse the JSON response
-            print("Fetched data:", data)  # Debug: Print the fetched data
-            return data if data else []  # Ensure it returns an empty list if data is None
+            data["led"] = response.json()  # Parse the JSON response
+            print("Fetched led:", data["led"])  # Debug: Print the fetched data
+            #return data if data else []  # Ensure it returns an empty list if data is None
+        response = urequests.get(firebase_url + color_node)
+        if response.status_code == 200:
+            print("Data fetched successfully")
+            data["color"] = response.json()  # Parse the JSON response
+            print("Fetched color:", data["color"])  # Debug: Print the fetched data
         else:
             print("Failed to fetch data. Status code:", response.status_code)
     except Exception as e:
         print("Error fetching data:", e)
-    return []
+    return data["led"], data["color"]
+
+def update_leds(led_indices, led_color):
+    global x, y, z
+    turn_off_all_leds()
+    
+    for i in led_indices:
+        if i < n:
+            np[i] = (led_color["red"], led_color["green"], led_color["blue"])
+            
+    np.write()
 
 # Function to incrementally update LED colors
-def update_leds(led_indices):
+def update_leds_rainbow(led_indices):
     global x, y, z
     turn_off_all_leds()  # Turn off all LEDs first
 
@@ -89,16 +107,17 @@ def update_leds(led_indices):
 # Main program
 def main():
     connect_to_wifi(WIFI_SSID, WIFI_PASSWORD)  # Connect to Wi-Fi
-    O = fetch_led_data_from_firebase() 
+    #O = fetch_led_data_from_firebase() 
 
     while True:
-        #O = fetch_led_data_from_firebase()  # Fetch the selected LEDs from Firebase
-        #print("Fetched LED indices:", O)
+        led_indices, led_color = fetch_led_data_from_firebase()  # Fetch the selected LEDs from Firebase
+        print("Fetched LED indices:", led_indices)
         
-        if O:
-            update_leds(O)  # Update the LEDs with the fetched data
+        if led_indices:
+            #update_leds_rainbow(O["led"])  # Update the LEDs with the fetched data
+            update_leds(led_indices, led_color)
 
-        #time.sleep(10)  # Delay between updates (10 seconds)
+        time.sleep(10)  # Delay between updates (10 seconds)
 
 # Start the program
 if __name__ == "__main__":
