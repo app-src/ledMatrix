@@ -116,6 +116,8 @@
                 for (let j = 0; j < width; j++) {
                     const circle = document.createElement('div');
                     circle.classList.add('circle');
+                    circle.dataset.number = circleNumber; // Store the displayed number
+                    circleNumber++;
                     rowCircles.push(circle); // Add circle to row array
                 }
 
@@ -124,18 +126,10 @@
 
                 if (mirroredRowIndex % 2 === 0) {
                     // Even rows in mirrored order: left to right
-                    for (let j = 0; j < width; j++) {
-                        rowCircles[j].textContent = circleNumber;
-                        rowCircles[j].dataset.number = circleNumber; // Store the displayed number
-                        circleNumber++;
-                    }
+                    rowCircles.forEach(circle => row.appendChild(circle));
                 } else {
                     // Odd rows in mirrored order: right to left
-                    for (let j = 0; j < width; j++) {
-                        rowCircles[width - j - 1].textContent = circleNumber;
-                        rowCircles[width - j - 1].dataset.number = circleNumber; // Store the displayed number
-                        circleNumber++;
-                    }
+                    rowCircles.reverse().forEach(circle => row.appendChild(circle));
                 }
 
                 // Add click event to each circle for toggling selection and updating Firebase
@@ -144,7 +138,6 @@
                         circle.classList.toggle('selected');
                         updateSelectedCircles(parseInt(circle.dataset.number), circle.classList.contains('selected'));
                     };
-                    row.appendChild(circle); // Append each circle to the row
                 });
 
                 gridContainer.appendChild(row); // Append the row to the grid container
@@ -182,6 +175,8 @@
                     const number = parseInt(circle.dataset.number);
                     if (selectedCircles.includes(number)) {
                         circle.classList.add('selected');
+                    } else {
+                        circle.classList.remove('selected');
                     }
                 });
             });

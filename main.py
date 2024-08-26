@@ -15,6 +15,10 @@ firebase_url = "https://allprojects68-default-rtdb.asia-southeast1.firebasedatab
 n = 210
 p = 27
 
+x, y, z = 0,0,0
+np = [(0, 0, 0)] * n  # Example initialization for LED colors
+
+
 np = neopixel.NeoPixel(machine.Pin(p), n)
 
 # Function to connect to Wi-Fi
@@ -53,26 +57,48 @@ def fetch_led_data_from_firebase():
         print("Error fetching data:", e)
     return []
 
-# Function to update LEDs based on the Firebase data
+# Function to incrementally update LED colors
 def update_leds(led_indices):
+    global x, y, z
     turn_off_all_leds()  # Turn off all LEDs first
+
     for i in led_indices:
         if i < n:  # Check to prevent out-of-range indices
-            np[i] = (255, 255, 0)
+            # Create a gradient effect in VIBGYOR color spectrum
+
+            # Cycle through VIBGYOR (Red -> Orange -> Yellow -> Green -> Blue -> Indigo -> Violet)
+            if x < 255 and y == 0 and z == 0:
+                x += 1  # Increasing Red
+            elif x == 255 and z < 255 and y == 0:
+                z += 1  # Increasing Blue
+            elif z == 255 and x > 0:
+                x -= 1  # Decreasing Red
+            elif x == 0 and z == 255 and y < 255:
+                y += 1  # Increasing Green
+            elif y == 255 and z > 0:
+                z -= 1  # Decreasing Blue
+            elif z == 0 and y > 0:
+                y -= 1  # Decreasing Green
+            
+            # Set the LED color
+            np[i] = (x, y, z)
+
+    # Update the LED strip with new colors
     np.write()
 
 # Main program
 def main():
     connect_to_wifi(WIFI_SSID, WIFI_PASSWORD)  # Connect to Wi-Fi
+    O = fetch_led_data_from_firebase() 
 
     while True:
-        O = fetch_led_data_from_firebase()  # Fetch the selected LEDs from Firebase
-        print("Fetched LED indices:", O)
+        #O = fetch_led_data_from_firebase()  # Fetch the selected LEDs from Firebase
+        #print("Fetched LED indices:", O)
         
         if O:
             update_leds(O)  # Update the LEDs with the fetched data
 
-        time.sleep(10)  # Delay between updates (10 seconds)
+        #time.sleep(10)  # Delay between updates (10 seconds)
 
 # Start the program
 if __name__ == "__main__":
