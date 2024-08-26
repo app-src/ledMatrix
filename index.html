@@ -89,6 +89,13 @@
         <input type="range" id="blueSlider" min="0" max="255" value="128">
     </div>
     
+    <div class="input-container">
+        <label for="colorPicker">Choose Color:</label>
+        <input type="color" id="colorPicker" value="#808080"> <!-- Default gray -->
+        <input type="text" id="rgbValue" readonly>
+    </div>
+    
+    
 
 
     <script>
@@ -210,9 +217,31 @@
     colorsRef.set({ red: redValue, green: greenValue, blue: blueValue });
 }
 
-document.getElementById('redSlider').addEventListener('input', updateColorSliders);
-document.getElementById('greenSlider').addEventListener('input', updateColorSliders);
-document.getElementById('blueSlider').addEventListener('input', updateColorSliders);
+// document.getElementById('redSlider').addEventListener('input', updateColorSliders);
+// document.getElementById('greenSlider').addEventListener('input', updateColorSliders);
+// document.getElementById('blueSlider').addEventListener('input', updateColorSliders);
+
+document.getElementById('redSlider').addEventListener('input', function() {
+    updateColorPicker();
+    updateFirebaseColors({ red: this.value, green: document.getElementById('greenSlider').value, blue: document.getElementById('blueSlider').value });
+});
+
+document.getElementById('greenSlider').addEventListener('input', function() {
+    updateColorPicker();
+    updateFirebaseColors({ red: document.getElementById('redSlider').value, green: this.value, blue: document.getElementById('blueSlider').value });
+});
+
+document.getElementById('blueSlider').addEventListener('input', function() {
+    updateColorPicker();
+    updateFirebaseColors({ red: document.getElementById('redSlider').value, green: document.getElementById('greenSlider').value, blue: this.value });
+});
+
+document.getElementById('colorPicker').addEventListener('input', function() {
+    const rgb = hexToRgb(this.value);
+    updateSlidersAndText(rgb);
+    updateFirebaseColors(rgb);
+});
+
 
 function renderColorSliders() {
     const colorsRef = db.ref('vaiLED/colors');
@@ -226,14 +255,57 @@ function renderColorSliders() {
     });
 }
 
+function hexToRgb(hex) {
+    const r = parseInt(hex.substr(1, 2), 16);
+    const g = parseInt(hex.substr(3, 2), 16);
+    const b = parseInt(hex.substr(5, 2), 16);
+    return { red: r, green: g, blue: b };
+}
+
+function rgbToHex(r, g, b) {
+    return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+}
+
+function updateSlidersAndText(rgb) {
+    document.getElementById('redSlider').value = rgb.red;
+    document.getElementById('greenSlider').value = rgb.green;
+    document.getElementById('blueSlider').value = rgb.blue;
+    document.getElementById('rgbValue').value = `RGB(${rgb.red}, ${rgb.green}, ${rgb.blue})`;
+}
+
+function updateColorPicker() {
+    const red = parseInt(document.getElementById('redSlider').value, 10);
+    const green = parseInt(document.getElementById('greenSlider').value, 10);
+    const blue = parseInt(document.getElementById('blueSlider').value, 10);
+    const hexColor = rgbToHex(red, green, blue);
+    document.getElementById('colorPicker').value = hexColor;
+    document.getElementById('rgbValue').value = `RGB(${red}, ${green}, ${blue})`;
+    updateFirebaseColors({ red, green, blue });
+}
+
+
+
 
 
         // Fetch the grid and render selected circles on page load
         window.onload = function() {
             generateGrid();
             renderColorSliders();
+            renderColorPickerAndText();
 
         };
+
+        function renderColorPickerAndText() {
+    const colorsRef = db.ref('vaiLED/colors');
+    colorsRef.once('value').then((snapshot) => {
+        const colors = snapshot.val();
+        if (colors) {
+            updateSlidersAndText(colors);
+            document.getElementById('colorPicker').value = rgbToHex(colors.red, colors.green, colors.blue);
+        }
+    });
+}
+
     </script>
 </body>
 </html>
