@@ -220,7 +220,10 @@
 // document.getElementById('redSlider').addEventListener('input', updateColorSliders);
 // document.getElementById('greenSlider').addEventListener('input', updateColorSliders);
 // document.getElementById('blueSlider').addEventListener('input', updateColorSliders);
-
+function updateFirebaseColors(rgb) {
+        const colorsRef = db.ref('vaiLED/colors');
+        colorsRef.set({ red: parseInt(rgb.red, 10), green: parseInt(rgb.green, 10), blue: parseInt(rgb.blue, 10) });
+    }
 document.getElementById('redSlider').addEventListener('input', function() {
     updateColorPicker();
     updateFirebaseColors({ red: this.value, green: document.getElementById('greenSlider').value, blue: document.getElementById('blueSlider').value });
