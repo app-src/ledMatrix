@@ -80,6 +80,17 @@
 
     <button onclick="generateOutput()">Generate Output</button>
 
+    <div class="input-container">
+        <label for="redSlider">Red:</label>
+        <input type="range" id="redSlider" min="0" max="255" value="128">
+        <label for="greenSlider">Green:</label>
+        <input type="range" id="greenSlider" min="0" max="255" value="128">
+        <label for="blueSlider">Blue:</label>
+        <input type="range" id="blueSlider" min="0" max="255" value="128">
+    </div>
+    
+
+
     <script>
         // Firebase configuration
         const firebaseConfig = {
