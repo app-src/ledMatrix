@@ -14,14 +14,17 @@ firebase_url = "https://allprojects68-default-rtdb.asia-southeast1.firebasedatab
 led_node = "selected.json"
 color_node = "colors.json"
 
+mode = ""
+
 n = 210
 p = 27
 
 x, y, z = 0,0,0
-np = [(0, 0, 0)] * n  # Example initialization for LED colors
 
 
 np = neopixel.NeoPixel(machine.Pin(p), n)
+
+
 
 # Function to connect to Wi-Fi
 def connect_to_wifi(ssid, password):
@@ -71,7 +74,9 @@ def update_leds(led_indices, led_color):
     
     for i in led_indices:
         if i < n:
-            np[i] = (led_color["red"], led_color["green"], led_color["blue"])
+            #np[i] = (led_color["red"], led_color["green"], led_color["blue"])
+            np[i] = tuple(int(c * 1) for c in (led_color["red"], led_color["green"], led_color["blue"]))
+            
             
     np.write()
 
@@ -111,13 +116,20 @@ def main():
 
     while True:
         led_indices, led_color = fetch_led_data_from_firebase()  # Fetch the selected LEDs from Firebase
-        print("Fetched LED indices:", led_indices)
+        #print("Fetched LED indices:", led_indices)
+        
+        #led_indices = [788, 750, 749, 791, 818, 860, 859, 821, 296, 30, 31, 32, 33, 36, 103, 106, 173, 172, 171, 170, 167, 112, 97, 42, 27, 26, 25, 24, 45, 94, 115, 164, 95, 96, 21, 48, 91, 118, 161, 20, 18, 19, 51, 88, 89, 90, 14, 84, 125, 154, 55, 16, 15, 13, 12, 150, 129, 130, 149]
+        
+    
         
         if led_indices:
             #update_leds_rainbow(O["led"])  # Update the LEDs with the fetched data
-            update_leds(led_indices, led_color)
+            if mode == "rainbow":
+                update_leds_rainbow(led_indices)
+            else:
+                update_leds(led_indices, led_color)
 
-        time.sleep(10)  # Delay between updates (10 seconds)
+        time.sleep(5)  # Delay between updates (10 seconds)
 
 # Start the program
 if __name__ == "__main__":

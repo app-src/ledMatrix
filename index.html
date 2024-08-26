@@ -94,6 +94,11 @@
         <input type="color" id="colorPicker" value="#808080"> <!-- Default gray -->
         <input type="text" id="rgbValue" readonly>
     </div>
+
+    <!-- Brightness Slider -->
+<label for="brightnessSlider">Brightness:</label>
+<input type="range" id="brightnessSlider" min="0" max="100" value="100">
+
     
     
 
@@ -244,6 +249,30 @@ document.getElementById('colorPicker').addEventListener('input', function() {
     updateSlidersAndText(rgb);
     updateFirebaseColors(rgb);
 });
+
+document.getElementById('brightnessSlider').addEventListener('input', function() {
+    updateBrightness();
+});
+
+function updateBrightness() {
+    var brightness = document.getElementById('brightnessSlider').value / 100;
+    var rgb = {
+        red: parseInt(document.getElementById('redSlider').value),
+        green: parseInt(document.getElementById('greenSlider').value),
+        blue: parseInt(document.getElementById('blueSlider').value)
+    };
+    
+    // Apply the brightness adjustment
+    var adjustedRGB = {
+        red: rgb.red * brightness,
+        green: rgb.green * brightness,
+        blue: rgb.blue * brightness
+    };
+
+    // Update the display or send the adjusted RGB values to your LEDs
+    console.log('Adjusted RGB:', adjustedRGB);  // Log or use the adjusted RGB values
+}
+
 
 
 function renderColorSliders() {
