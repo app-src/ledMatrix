@@ -201,9 +201,38 @@
             });
         }
 
+        function updateColorSliders() {
+    const redValue = document.getElementById('redSlider').value;
+    const greenValue = document.getElementById('greenSlider').value;
+    const blueValue = document.getElementById('blueSlider').value;
+
+    const colorsRef = db.ref('vaiLED/colors');
+    colorsRef.set({ red: redValue, green: greenValue, blue: blueValue });
+}
+
+document.getElementById('redSlider').addEventListener('input', updateColorSliders);
+document.getElementById('greenSlider').addEventListener('input', updateColorSliders);
+document.getElementById('blueSlider').addEventListener('input', updateColorSliders);
+
+function renderColorSliders() {
+    const colorsRef = db.ref('vaiLED/colors');
+    colorsRef.once('value').then((snapshot) => {
+        const colors = snapshot.val();
+        if (colors) {
+            document.getElementById('redSlider').value = colors.red;
+            document.getElementById('greenSlider').value = colors.green;
+            document.getElementById('blueSlider').value = colors.blue;
+        }
+    });
+}
+
+
+
         // Fetch the grid and render selected circles on page load
         window.onload = function() {
             generateGrid();
+            renderColorSliders();
+
         };
     </script>
 </body>
