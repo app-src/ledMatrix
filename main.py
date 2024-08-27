@@ -77,6 +77,20 @@ def fetch_led_data_from_firebase():
         print("Error fetching data:", e)
     #return data["led"], data["color"]
 
+# Function to fetch the LED data from Firebase
+def fetch_img_data_from_firebase():
+    global led_indices
+    #data = {"led":[], "color":[]}
+    try:
+        response = urequests.get(firebase_url + "img.json")
+        if response.status_code == 200:
+            print("Data fetched successfully")
+            led_indices = response.json()  # Parse the JSON response
+            print("Fetched led:", led_indices)  # Debug: Print the fetched data
+            #return data if data else []  # Ensure it returns an empty list if data is None
+    except Exception as e:
+        print("Error fetching data:", e)
+
 def update_leds():
     global led_indices, led_color
     turn_off_all_leds()
@@ -88,6 +102,23 @@ def update_leds():
         if i < n:
             #np[i] = (led_color["red"], led_color["green"], led_color["blue"])
             np[i] = tuple(int(c * brightness) for c in (led_color["red"], led_color["green"], led_color["blue"]))
+            
+            
+    np.write()
+    
+def update_leds_img():
+    global led_indices
+    turn_off_all_leds()
+    
+    brightness = adc.read() / 4095
+    #print(brightness)
+    print(led_indices)
+    
+    for i in range(n):
+        if True:
+            #np[i] = (led_color["red"], led_color["green"], led_color["blue"])
+            np[i] = tuple(int(c * brightness) for c in (led_indices[i][0], led_indices[i][1], led_indices[i][2]))
+            print(led_indices[i][0], led_indices[i][1], led_indices[i][2])
             
             
     np.write()
@@ -124,7 +155,7 @@ def update_leds_rainbow(led_indices):
 # Main program
 
 # Main program
-def main():
+def main2():
     last_fetch_time = time.time()  # Record the start time
     connect_to_wifi(WIFI_SSID, WIFI_PASSWORD)  # Connect to Wi-Fi
     
@@ -134,7 +165,7 @@ def main():
         current_time = time.time()  # Get the current time
         
         # Check if 5 seconds have elapsed since the last fetch
-        if current_time - last_fetch_time >= 20:
+        if current_time - last_fetch_time >= 200:
             fetch_led_data_from_firebase()  # Fetch new data
             update_leds()
             last_fetch_time = current_time  # Update the last fetch time
@@ -146,6 +177,14 @@ def main():
             else:
                 update_leds()
             time.sleep(0.1)
+            
+def main():
+    fetch_img_data_from_firebase()
+    while True:
+        update_leds_img()
+        time.sleep(0.1)
+        
+    
 
 # Start the program
 if __name__ == "__main__":
@@ -153,4 +192,6 @@ if __name__ == "__main__":
     """while True:
         print(adc.read() / 4095)
         time.sleep(1)"""
+    
+    #fetch_img_data_from_firebase()
 
