@@ -96,7 +96,7 @@ def update_leds():
     turn_off_all_leds()
     
     brightness = adc.read() / 4095
-    print(brightness)
+    #print(brightness)
     
     for i in led_indices:
         if i < n:
@@ -112,13 +112,13 @@ def update_leds_img():
     
     brightness = adc.read() / 4095
     #print(brightness)
-    print(led_indices)
+    #print(led_indices)
     
     for i in range(n):
         if True:
             #np[i] = (led_color["red"], led_color["green"], led_color["blue"])
             np[i] = tuple(int(c * brightness) for c in (led_indices[i][0], led_indices[i][1], led_indices[i][2]))
-            print(led_indices[i][0], led_indices[i][1], led_indices[i][2])
+            #print(led_indices[i][0], led_indices[i][1], led_indices[i][2])
             
             
     np.write()
