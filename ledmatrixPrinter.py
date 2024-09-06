@@ -77,16 +77,28 @@ def simulate_scroll(data2d, SKIPINTERVAL=SKIPINTERVAL, UPDATEDELAY=UPDATEDELAY):
 
 #dump data into a json
 
-def send_data(data, esp32_ip):
+import requests
+import time
+
+def send_data_in_chunks(data, esp32_ip, chunk_size=1000):
+    data = str(data)
     url = f"http://{esp32_ip}"
-    headers = {'Content-Type': 'application/json'}
+    chunks = [data[i:i+chunk_size] for i in range(0, len(data), chunk_size)]
     
-    try:
-        response = requests.post(url, data=json.dumps(data), headers=headers)
-        print("Response:", response.text)
-    except requests.exceptions.RequestException as e:
-        print("Error sending data:", e)
+    for i, chunk in enumerate(chunks, 1):
+        headers = {
+            'Content-Type': 'text/plain',
+            'Chunk-Number': str(i)
+        }
+        try:
+            response = requests.post(url, data=chunk, headers=headers)
+            print(f"Chunk {i}/{len(chunks)} sent. Response: {response.text}")
+        except requests.exceptions.RequestException as e:
+            print(f"Error sending chunk {i}: {str(e)}")
+        time.sleep(0.1)  # Small delay between chunks
+
+
         
 data2d = return2dArray(data)
 reverseEveryOtherRow(data2d)
-send_data(return1dArray(data2d), esp32_ip)
+send_data_in_chunks(return1dArray("hi large data here "), esp32_ip)
